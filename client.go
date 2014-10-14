@@ -41,9 +41,9 @@ func init() {
 //   -d currency=USD
 func Invoice() {
 
-	stringResponse("/tokens", url.Values{
-	//"price":    {"10.00"},
-	//"currency": {"USD"},
+	stringResponse("/api/invoice", url.Values{
+		"price":    {"10.00"},
+		"currency": {"USD"},
 	})
 }
 
@@ -69,10 +69,11 @@ func stringResponse(path string, data url.Values) {
 	req.ParseForm()
 	pub := cfg.Global.Pub
 	sign := signMessage(cfg.Global.Priv, path)
-	req.Header.Add("x-pubkey", pub)
-	req.Header.Add("x-accept-version", "2.0.0")
-	req.Header.Add("x-signature", sign)
+	_, _ = pub, sign
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("x-accept-version", "2.0.0")
+	req.Header.Add("x-pubkey", pub)
+	req.Header.Add("x-signature", sign)
 	//req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 	res, err := client.Do(req)
 	fmt.Printf("% #v\n", req.Header)
@@ -110,7 +111,7 @@ func signMessage(key, message string) string {
 	// fmt.Printf("Serialized Signature: %x\n", signature.Serialize())
 
 	// Verify the signature for the message using the public key.
-	// verified := signature.Verify(messageHash, pubKey)
-	// fmt.Printf("Signature Verified? %v\n", verified)
+	verified := signature.Verify(messageHash, pubKey)
+	fmt.Printf("Signature Verified against pubkey? %v\n", verified)
 	return fmt.Sprintf("%x", signature.Serialize())
 }
