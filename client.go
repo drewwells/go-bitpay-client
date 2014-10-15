@@ -2,23 +2,26 @@ package go_bitpay_client
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"strconv"
-	"time"
+	"strings"
+
+	"crypto/sha256"
 
 	"code.google.com/p/gcfg"
 	"github.com/conformal/btcec"
-	"github.com/conformal/btcwire"
 )
 
 type Config struct {
 	Global struct {
-		Pub, Priv, End string
+		Id, Pub, Priv, End, Token string
 	}
 }
 
@@ -34,49 +37,87 @@ func init() {
 	}
 }
 
+func Token() []byte {
+	resp := stringResponse("/tokens", //?nonce="+
+		//strconv.FormatInt(time.Now().UnixNano()/1000000, 10),
+		"POST", url.Values{
+			"guid":  {"1"},
+			"label": {"node-bitpay-client-dwells-mac2"},
+			"id":    {cfg.Global.Id},
+		}, true)
+	return resp
+}
+
 // Invoice creates a currency invoice
 // curl https://bitpay.com/api/invoice \
 //   -u ApiKey \
 //   -d price=10.00 \
 //   -d currency=USD
-func Invoice() {
+func Invoice() []byte {
 
-	stringResponse("/api/invoice", url.Values{
+	return stringResponse("/invoices", "POST", url.Values{
 		"price":    {"10.00"},
 		"currency": {"USD"},
-	})
+		//"nonce":    {strconv.FormatInt(time.Now().UnixNano()/1000000, 10)},
+		"guid":  {"553c5ca8-b3e6-c9b2-8a29-e203ccd9d45g"},
+		"token": {cfg.Global.Token},
+	}, false)
 }
 
-func stringResponse(path string, data url.Values) {
-	unwrap := make(map[string]string)
+func Rates() []byte {
+	return stringResponse("/rates", "GET", url.Values{}, true)
+}
+
+func stringResponse(path, method string, data url.Values, public bool) []byte {
+	unwrap := make(map[string]interface{})
 
 	for i := range data {
-		unwrap[i] = data[i][0]
+		if i == "nonce" {
+			i64, _ := strconv.ParseInt(data[i][0], 10, 64)
+			unwrap[i] = i64
+		} else if i == "price" {
+			f64, _ := strconv.ParseFloat(data[i][0], 64)
+			unwrap[i] = f64
+		} else {
+			unwrap[i] = data[i][0]
+		}
 	}
-
+	var bs []byte
+	if len(unwrap) > 0 {
+		bs, _ = json.Marshal(unwrap)
+	}
+	var body io.Reader
+	if len(bs) > 0 {
+		body = strings.NewReader(string(bs))
+	}
 	jar, err := cookiejar.New(&cookiejar.Options{})
 	if err != nil {
 		log.Fatal(err)
 	}
 	client := http.Client{Jar: jar}
-	path = cfg.Global.End + path + "?nonce=" + strconv.FormatInt(time.Now().Unix(), 10)
-	req, err := http.NewRequest("GET",
+	path = cfg.Global.End + path
+	req, err := http.NewRequest(method,
 		path,
-		nil)
+		body)
 	if err != nil {
 		log.Fatal(err)
 	}
-	req.ParseForm()
 	pub := cfg.Global.Pub
-	sign := signMessage(cfg.Global.Priv, path)
-	_, _ = pub, sign
+	contract := path + string(bs)
+	sign := signMessage(cfg.Global.Priv, contract)
+
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("x-accept-version", "2.0.0")
-	req.Header.Add("x-pubkey", pub)
-	req.Header.Add("x-signature", sign)
-	//req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+	if !public {
+		req.Header.Add("x-identity", pub)
+		req.Header.Add("x-signature", sign)
+	}
+	req.Header.Add("Content-Length",
+		strconv.FormatInt(req.ContentLength, 10))
+	// Dump the request before client eats the headers
+	// rawr, _ := httputil.DumpRequestOut(req, true)
 	res, err := client.Do(req)
-	fmt.Printf("% #v\n", req.Header)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -84,12 +125,17 @@ func stringResponse(path string, data url.Values) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Raw dump of request/response
+	// fmt.Println("request", string(rawr))
+	// dump, _ := httputil.DumpResponse(res, true)
+	// fmt.Println("response", string(dump))
 	res.Body.Close()
-	log.Printf("%s\n", string(bytes))
+	return bytes
 }
 
 func signMessage(key, message string) string {
-	fmt.Println("signing", message)
+	log.Print("signing", message)
 	// Decode a hex-encoded private key.
 	pkBytes, err := hex.DecodeString(key)
 	if err != nil {
@@ -98,8 +144,13 @@ func signMessage(key, message string) string {
 	privKey, pubKey := btcec.PrivKeyFromBytes(btcec.S256(), pkBytes)
 	_ = pubKey
 	// Sign a message using the private key.
-	messageHash := btcwire.DoubleSha256([]byte(message))
-	signature, err := privKey.Sign(messageHash)
+
+	h := sha256.New()
+	io.WriteString(h, message)
+	signhash := h.Sum(nil)
+	// Do not use this, sha256 hash is used for token creation
+	// messageHash := btcwire.DoubleSha256([]byte(message))
+	signature, err := privKey.Sign(signhash)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,7 +162,7 @@ func signMessage(key, message string) string {
 	// fmt.Printf("Serialized Signature: %x\n", signature.Serialize())
 
 	// Verify the signature for the message using the public key.
-	verified := signature.Verify(messageHash, pubKey)
-	fmt.Printf("Signature Verified against pubkey? %v\n", verified)
+	// verified := signature.Verify(messageHash, pubKey)
+	// fmt.Printf("Signature Verified against pubkey? %v\n", verified)
 	return fmt.Sprintf("%x", signature.Serialize())
 }

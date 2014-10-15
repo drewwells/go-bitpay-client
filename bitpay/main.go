@@ -1,7 +1,12 @@
 package main
 
-import bitpay "github.com/drewwells/go-bitpay-client"
+import (
+	"fmt"
+
+	bitpay "github.com/drewwells/go-bitpay-client"
+)
 
 func main() {
-	bitpay.Invoice()
+	resp := bitpay.Token()
+	fmt.Println(string(resp))
 }
