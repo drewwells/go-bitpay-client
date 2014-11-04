@@ -40,10 +40,10 @@ func init() {
 func Token() []byte {
 	resp := stringResponse("/tokens", //?nonce="+
 		//strconv.FormatInt(time.Now().UnixNano()/1000000, 10),
-		"POST", url.Values{
-			"guid":  {"1"},
-			"label": {"node-bitpay-client-dwells-mac2"},
-			"id":    {cfg.Global.Id},
+		"POST", map[string]interface{}{
+			"guid":  "1",
+			"label": "node-bitpay-client-dwells-mac2",
+			"id":    cfg.Global.Id,
 		}, true)
 	return resp
 }
@@ -55,39 +55,62 @@ func Token() []byte {
 //   -d currency=USD
 func Invoice() []byte {
 
-	return stringResponse("/invoices", "POST", url.Values{
-		"price":    {"10.00"},
-		"currency": {"USD"},
+	return stringResponse("/invoices", "POST", map[string]interface{}{
+		"price":    "10.00",
+		"currency": "USD",
 		//"nonce":    {strconv.FormatInt(time.Now().UnixNano()/1000000, 10)},
-		"guid":  {"553c5ca8-b3e6-c9b2-8a29-e203ccd9d45g"},
-		"token": {cfg.Global.Token},
+		"guid":  "553c5ca8-b3e6-c9b2-8a29-e203ccd9d45g",
+		"token": cfg.Global.Token,
+	}, false)
+}
+
+func Bill() []byte {
+	return stringResponse("/bills", "POST", map[string]interface{}{
+		"items": []map[string]interface{}{
+			map[string]interface{}{
+				"description": "GOT BILLS YO",
+				"price":       1,
+				"quantity":    1,
+			},
+		},
+		"currency": "BTC",
+		"guid":     "553-guid",
+		"token":    cfg.Global.Token,
+	}, false)
+}
+
+func Bills() []byte {
+	return stringResponse("/bills", "GET", map[string]interface{}{
+		"token": cfg.Global.Token,
 	}, false)
 }
 
 func Rates() []byte {
-	return stringResponse("/rates", "GET", url.Values{}, true)
+	return stringResponse("/rates", "GET", map[string]interface{}{}, true)
 }
 
-func stringResponse(path, method string, data url.Values, public bool) []byte {
+func stringResponse(path, method string, data map[string]interface{}, public bool) []byte {
 	unwrap := make(map[string]interface{})
 
 	for i := range data {
 		if i == "nonce" {
-			i64, _ := strconv.ParseInt(data[i][0], 10, 64)
+			i64, _ := strconv.ParseInt(data[i].(string), 10, 64)
 			unwrap[i] = i64
 		} else if i == "price" {
-			f64, _ := strconv.ParseFloat(data[i][0], 64)
+			f64, _ := strconv.ParseFloat(data[i].(string), 64)
 			unwrap[i] = f64
 		} else {
-			unwrap[i] = data[i][0]
+			unwrap[i] = data[i]
 		}
 	}
-	var bs []byte
+	var (
+		bs   []byte
+		body io.Reader
+	)
 	if len(unwrap) > 0 {
 		bs, _ = json.Marshal(unwrap)
 	}
-	var body io.Reader
-	if len(bs) > 0 {
+	if len(bs) > 0 && method != "GET" {
 		body = strings.NewReader(string(bs))
 	}
 	jar, err := cookiejar.New(&cookiejar.Options{})
@@ -96,6 +119,13 @@ func stringResponse(path, method string, data url.Values, public bool) []byte {
 	}
 	client := http.Client{Jar: jar}
 	path = cfg.Global.End + path
+	if method == "GET" {
+		query := url.Values{}
+		for i, v := range data {
+			query.Add(i, v.(string))
+		}
+		path += "?" + query.Encode()
+	}
 	req, err := http.NewRequest(method,
 		path,
 		body)
@@ -103,7 +133,10 @@ func stringResponse(path, method string, data url.Values, public bool) []byte {
 		log.Fatal(err)
 	}
 	pub := cfg.Global.Pub
-	contract := path + string(bs)
+	contract := path
+	if method != "GET" {
+		contract += string(bs)
+	}
 	sign := signMessage(cfg.Global.Priv, contract)
 
 	req.Header.Add("Content-Type", "application/json")
