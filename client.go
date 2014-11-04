@@ -17,6 +17,7 @@ import (
 
 	"code.google.com/p/gcfg"
 	"github.com/conformal/btcec"
+	"github.com/nu7hatch/gouuid"
 )
 
 type Config struct {
@@ -37,11 +38,19 @@ func init() {
 	}
 }
 
+func guid() string {
+	u, err := uuid.NewV4()
+	if err != nil {
+		panic(err)
+	}
+	return u.String()
+}
+
 func Token() []byte {
 	resp := stringResponse("/tokens", //?nonce="+
 		//strconv.FormatInt(time.Now().UnixNano()/1000000, 10),
 		"POST", map[string]interface{}{
-			"guid":  "1",
+			"guid":  guid(),
 			"label": "node-bitpay-client-dwells-mac2",
 			"id":    cfg.Global.Id,
 		}, true)
@@ -59,7 +68,7 @@ func Invoice() []byte {
 		"price":    "10.00",
 		"currency": "USD",
 		//"nonce":    {strconv.FormatInt(time.Now().UnixNano()/1000000, 10)},
-		"guid":  "553c5ca8-b3e6-c9b2-8a29-e203ccd9d45g",
+		"guid":  guid(),
 		"token": cfg.Global.Token,
 	}, false)
 }
@@ -74,7 +83,7 @@ func Bill() []byte {
 			},
 		},
 		"currency": "BTC",
-		"guid":     "553-guid",
+		"guid":     guid(),
 		"token":    cfg.Global.Token,
 	}, false)
 }
