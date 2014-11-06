@@ -31,10 +31,10 @@ var cfg Config
 func init() {
 	err := gcfg.ReadFileInto(&cfg, ".env")
 	if err != nil {
-		panic(err)
+		log.Fatal("Please rever to .env.example for config values")
 	}
 	if cfg.Global.Pub == "" {
-		log.Fatal("Please register an API key at bitpay.com and sign it with bitpay cli")
+		log.Fatal("Please register an API key at bitpay.com and sign it with offical bitpay cli, node or otherwise.")
 	}
 }
 
