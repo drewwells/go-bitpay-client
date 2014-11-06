@@ -13,7 +13,7 @@ import (
 func main() {
 	flag.Parse()
 	var resp []byte
-	iresp := bitpay.Token()
+	iresp := bitpay.Bills()
 
 	// Create a list of available commands and if found call them
 	funcs := map[string]interface{}{
@@ -21,6 +21,7 @@ func main() {
 		"invoice": bitpay.Invoice,
 		"bills":   bitpay.Bills,
 		"bill":    bitpay.Bill,
+		"rates":   bitpay.Rates,
 	}
 
 	for _, v := range flag.Args() {
