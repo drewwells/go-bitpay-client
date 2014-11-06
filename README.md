@@ -14,9 +14,9 @@ Use the node wrapper to generate your client tokens.  This part isn't implement 
     bitpay keygen
     bitpay pair
     
-Copy .env.sample to .env, this has a series of client variables for negotiating with the bitpay server.  Be
-sure your account is the correct type (test account for test.bitpay.com or prod account for www.bitpay.com).  For
-the rest of this setup, the docs will assume you are using the test environment.
+bitpay generates key files in the ~/.bitpay folder.  Copy .env.sample to .env, this has a series of client variables for negotiating with the bitpay server.  Be sure your account is the correct type (test account for test.bitpay.com or prod account for www.bitpay.com).
+
+For the rest of this setup, the docs will assume you are using the test environment.
 
 The keys generated now need to be hex encoded, this function will do that: https://github.com/bitpay/bitauth/blob/master/lib/bitauth.js#L12.  The results should be a long series 
 of numbers and *LOWER CASE* letters.  Save this as your pub and priv values in the .env file.
@@ -45,3 +45,8 @@ Setup an .env file with your private, public keys and user id.  Copy .env.sample
 	go get github.com/drewwells/go-bitpay-client
 	cd $GOPATH/src/github.com/drewwells/go-bitpay-client
 	go run bitpay/main.go
+
+### Help
+
+If you're getting stuck with invalid sin or invalid token, [bitauth](https://www.npmjs.org/package/bitauth) 
+is the source of truth.  Try playing around with those examples with your credentials (located in ~/.bitpay).
