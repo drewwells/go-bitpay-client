@@ -18,6 +18,7 @@ Learning Go
 
 * http://www.golang-book.com/
 * Great book! [Programming Go](http://www.amazon.com/Programming-Go-Creating-Applications-Developers/dp/0321774639)
+* https://gobyexample.com
 
 Setup an .env file with your private, public keys and user id.  Copy .env.sample and fill in these values.  Keys are currently generated via debugging the Node API.  Fork or checkout this project.
 

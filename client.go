@@ -46,6 +46,7 @@ func guid() string {
 	return u.String()
 }
 
+// Creates or claims an access token
 func Token() []byte {
 	resp := stringResponse("/tokens", //?nonce="+
 		//strconv.FormatInt(time.Now().UnixNano()/1000000, 10),
@@ -73,6 +74,7 @@ func Invoice() []byte {
 	}, false)
 }
 
+// Create a bill
 func Bill() []byte {
 	return stringResponse("/bills", "POST", map[string]interface{}{
 		"items": []map[string]interface{}{
@@ -88,6 +90,7 @@ func Bill() []byte {
 	}, false)
 }
 
+// List all bills
 func Bills() []byte {
 	return stringResponse("/bills", "GET", map[string]interface{}{
 		"token": cfg.Global.Token,
