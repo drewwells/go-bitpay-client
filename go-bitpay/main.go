@@ -13,7 +13,6 @@ import (
 func main() {
 	flag.Parse()
 	var resp []byte
-	iresp := bitpay.Bills()
 
 	// Create a list of available commands and if found call them
 	funcs := map[string]interface{}{
@@ -32,9 +31,7 @@ func main() {
 		}
 	}
 	// JSON is returned
-	var v, vv interface{}
+	var v interface{}
 	json.Unmarshal(resp, &v)
-	json.Unmarshal(iresp, &vv)
-	fmt.Printf("% #v", pretty.Formatter(vv))
 	fmt.Printf("% #v", pretty.Formatter(v))
 }

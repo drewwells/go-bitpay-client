@@ -22,7 +22,7 @@ import (
 
 type Config struct {
 	Global struct {
-		Id, Pub, Priv, End, Token string
+		Pub, Priv, End, Sin, Token string
 	}
 }
 
@@ -53,7 +53,7 @@ func Token() []byte {
 		"POST", map[string]interface{}{
 			"guid":  guid(),
 			"label": "node-bitpay-client-dwells-mac2",
-			"id":    cfg.Global.Id,
+			"id":    cfg.Global.Token,
 		}, true)
 	return resp
 }

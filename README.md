@@ -16,7 +16,7 @@ Use the node wrapper to generate your client tokens.  This part isn't implement 
 
 bitpay generates key files in the ~/.bitpay folder.  The keys generated now need to be hex encoded, this function will do that: https://github.com/bitpay/bitauth/blob/master/lib/bitauth.js#L12.  The results should be a long series of numbers and *LOWER CASE* letters.  Save this as your pub and priv values in the .env file.
 
-Go back to go-bitpay-client project root and copy .env.sample to .env.  This file stores all the credentials needed for negotiating with the bitpay server.  Generate a token based off your *PUBLIC* key, this can be done a few different ways.  Try this one.  If it doesn't work please pull request to fix it, thanks!
+Go back to go-bitpay-client project root and copy .env.sample to .env.  This file stores all the credentials needed for negotiating with the bitpay server.  Generate a token based off your *PUBLIC* key, this can be done a few different ways.  Try this one.  If it doesn't work please pull request to fix it, thanks!  In order to do this, you need to set the publickey value in your .env file.  This is your public key, hint: your public key the format is camelcase with numbers.
 
     go get github.com/drewwells/go-bitpay-client/go-bitpay
     go-bitpay token
