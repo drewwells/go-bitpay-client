@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"math/big"
 
-	gimme "github.com/drewwells/gimme"
+	"github.com/drewwells/btcaddr"
 )
 
 // Keygen generates a new private/public key pair.  These are used for pairing
 // to the Bitpay API.
 func Keygen() ([]byte, []byte, error) {
 
-	p, b, err := gimme.Bitcoin_GenerateKeypair()
+	p, b, err := btcaddr.Bitcoin_GenerateKeypair()
 	_ = b
 	fmt.Printf("Bitcoin len: %d\n", len(p.D.Bytes()))
 	//privstr := gimme.Bitcoin_Prikey2WIF(p)
