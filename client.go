@@ -22,7 +22,7 @@ import (
 
 type Config struct {
 	Global struct {
-		Pub, Priv, End, Sin, Token string
+		Pub, Priv, End, Sin, Token, Publickey string
 	}
 }
 
@@ -31,7 +31,9 @@ var cfg Config
 func init() {
 	err := gcfg.ReadFileInto(&cfg, ".env")
 	if err != nil {
-		log.Fatal("Please rever to .env.example for config values")
+		log.Print(err)
+		log.Fatal("Please refer to .env.example for config values")
+
 	}
 	if cfg.Global.Pub == "" {
 		log.Fatal("Please register an API key at bitpay.com and sign it with offical bitpay cli, node or otherwise.")
