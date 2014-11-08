@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/drewwells/btcaddr"
+	btcaddr "github.com/drewwells/gimme_bitcoin_address"
 )
 
 // Keygen generates a new private/public key pair.  These are used for pairing
