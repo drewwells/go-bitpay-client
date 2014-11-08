@@ -1,3 +1,10 @@
+/*
+Base58 is a group of binary-to-text encoding schemes used to represent large integers as alphanumeric text. It is similar to Base64 but has been modified to avoid both non-alphanumeric characters and letters which might look ambiguous when printed. It is therefore designed for human users who manually enter the data, copying from some visual source, but also allows easy copy and paste because a double-click will usually select the whole string.
+
+Compared to Base64, the following letters have been omitted from the alphabet: 0 (zero), O (capital o), I (capital i) and l (lower case L) as well as the non-alphanumeric characters + (plus) and / (slash). In contrast to Base64, the digits of the encoding don't line up well with byte boundaries of the original data. For this reason, the method is well-suited to encode large integers, but not designed to encode longer portions of binary data. The actual order of letters in the alphabet depends on the application, which is the reason why the term “Base58” alone is not enough to fully describe the format.
+
+base58 returns encoded text suitable for use with Bitcoin.  Bitcoin compatible base58 does not pad like fixed width base58.  As a result, the size of the returned slice can be different for the same sized input.
+*/
 package base58
 
 import (
