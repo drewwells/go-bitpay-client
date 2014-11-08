@@ -1,4 +1,4 @@
-package btcbase58
+package base58
 
 import (
 	"crypto/sha256"
@@ -17,8 +17,7 @@ func DecodedLen() {}
 
 var ErrInvalid = errors.New("encoding/base58: invalid character found")
 
-var bigRadix = big.NewInt(58)
-var bigZero = big.NewInt(0)
+const radix = 58
 
 // Decode decodes src base10 string and returns the base58 encoded string
 // and size of the result.
@@ -40,7 +39,7 @@ func Decode(src []byte) ([]byte, int, error) {
 		tmp1.Mul(j, idx)
 
 		answer.Add(answer, tmp1)
-		j.Mul(j, bigRadix)
+		j.Mul(j, big.NewInt(radix))
 	}
 
 	tmpval := answer.Bytes()

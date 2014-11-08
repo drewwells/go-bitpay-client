@@ -1,4 +1,4 @@
-package btcbase58
+package base58
 
 import (
 	"encoding/hex"
