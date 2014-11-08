@@ -7,8 +7,6 @@ import (
 	"math"
 	"math/big"
 	"strings"
-
-	"github.com/conformal/btcutil"
 )
 
 const base58table = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
@@ -86,7 +84,8 @@ func Check(h []byte) string {
 	for i := 0; i < 4; i++ {
 		check[i+len(h)] = hash[i]
 	}
-	return btcutil.Base58Encode(check)
+	dst, _ := Encode(check)
+	return string(dst)
 }
 
 // The radix of the base58 encoding system.
