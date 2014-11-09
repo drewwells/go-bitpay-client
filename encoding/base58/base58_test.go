@@ -2,6 +2,7 @@ package base58
 
 import (
 	"encoding/hex"
+	"fmt"
 	"testing"
 )
 
@@ -41,6 +42,26 @@ func TestEncode(t *testing.T) {
 				line[2], b)
 		}
 	}
+}
+
+func ExampleEncode() {
+	// Decode hex prior to passing it to Encode
+	h := []byte("bf4f89001e670274dd")
+	ten := make([]byte, hex.DecodedLen(len(h)))
+	hex.Decode(ten, h)
+	fmt.Printf("base10: %s\n", ten)
+	fmt.Printf("hex: %x\n", ten)
+
+	fifty, len := Encode(ten)
+	fmt.Printf("len: %d text: %s\n", len, fifty)
+	// Output:
+	// base10: �O�gt�
+	// hex: bf4f89001e670274dd
+	// len: 13 text: 3SEo3LWLoPntC
+}
+
+func ExampleDecode() {
+	fmt.Println("Hello")
 }
 
 func TestDecode(t *testing.T) {
