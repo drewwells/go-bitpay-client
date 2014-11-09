@@ -60,8 +60,21 @@ func ExampleEncode_hex() {
 	// len: 13 text: 3SEo3LWLoPntC
 }
 
-func ExampleDecode() {
-	fmt.Println("Hello")
+func ExampleDecode_bitaddress() {
+	addr := []byte("1PbyRQXKNCwcmn43ZpJ4pxFEAvnG8iAc6J")
+	fmt.Printf("Bitcoin addresses are %d characters long\n", len(addr))
+	decoded, len, err := Decode(addr)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("Length of byte slice: %d\n", len)
+	fmt.Printf("hex encoded base10: %x\n", decoded)
+	fmt.Printf("Byte slice: %v\n", decoded)
+	// Output:
+	// Bitcoin addresses are 34 characters long
+	// Length of byte slice: 25
+	// hex encoded base10: 00f7f001f4f3c2e3ea60440f4e3f97d9dd5266345d234d30b7
+	// Byte slice: [0 247 240 1 244 243 194 227 234 96 68 15 78 63 151 217 221 82 102 52 93 35 77 48 183]
 }
 
 func TestDecode(t *testing.T) {
