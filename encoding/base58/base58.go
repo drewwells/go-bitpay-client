@@ -79,7 +79,7 @@ func doubleSha256(b []byte) []byte {
 	return hasher.Sum(nil)
 }
 
-// Base58Check accepts base10 byte string and returns base58 encoded
+// Base58Check accepts a byte string and returns base58 encoded
 // verification string as defined:
 // https://en.bitcoin.it/wiki/Base58Check_encoding#Creating_a_Base58Check_string
 func Check(h []byte) string {
@@ -109,7 +109,7 @@ func MaxEncodedLen(b []byte) int {
 }
 
 // Encode creates Bitcoin compatible Base58 encoded strings
-// from a base10 byte slice.  The length is variable based on same
+// from a byte slice.  The length is variable based on same
 // sized input slice.
 func Encode(src []byte) ([]byte, int) {
 
@@ -144,7 +144,7 @@ func Encode(src []byte) ([]byte, int) {
 	return dst, len(dst)
 }
 
-// EncodeToString returns a string from a base10 byte slice.
+// EncodeToString returns a string from a byte slice.
 func EncodeToString(src []byte) string {
 	dst, _ := Encode(src)
 	return string(dst)
