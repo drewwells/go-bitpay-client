@@ -44,18 +44,18 @@ func TestEncode(t *testing.T) {
 	}
 }
 
-func ExampleEncode() {
+func ExampleEncode_hex() {
 	// Decode hex prior to passing it to Encode
 	h := []byte("bf4f89001e670274dd")
 	ten := make([]byte, hex.DecodedLen(len(h)))
 	hex.Decode(ten, h)
-	fmt.Printf("base10: %s\n", ten)
+	fmt.Printf("base10: %d\n", ten)
 	fmt.Printf("hex: %x\n", ten)
 
 	fifty, len := Encode(ten)
 	fmt.Printf("len: %d text: %s\n", len, fifty)
 	// Output:
-	// base10: �O�gt�
+	// base10: [191 79 137 0 30 103 2 116 221]
 	// hex: bf4f89001e670274dd
 	// len: 13 text: 3SEo3LWLoPntC
 }
