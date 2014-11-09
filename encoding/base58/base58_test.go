@@ -68,12 +68,12 @@ func ExampleDecode_bitaddress() {
 		fmt.Println(err)
 	}
 	fmt.Printf("Length of byte slice: %d\n", len)
-	fmt.Printf("hex encoded base10: %x\n", decoded)
+	fmt.Printf("address in hex: %x\n", decoded)
 	fmt.Printf("Byte slice: %v\n", decoded)
 	// Output:
 	// Bitcoin addresses are 34 characters long
 	// Length of byte slice: 25
-	// hex encoded base10: 00f7f001f4f3c2e3ea60440f4e3f97d9dd5266345d234d30b7
+	// address in hex: 00f7f001f4f3c2e3ea60440f4e3f97d9dd5266345d234d30b7
 	// Byte slice: [0 247 240 1 244 243 194 227 234 96 68 15 78 63 151 217 221 82 102 52 93 35 77 48 183]
 }
 
