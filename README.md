@@ -1,5 +1,7 @@
 ## go-bitpay-client
 
+[![GoDoc](https://godoc.org/github.com/drewwells/go-bitpay-client?status.svg)](http://godoc.org/github.com/drewwells/go-bitpay-client)
+
 Wrapper for the [Bitpay API](https://test.bitpay.com/api).  This library leverages the great [btcec](http://github.com/conformal/btcec) library for private/public authentication.
 
 go-bitpay-client is still alpha and not all operations are currently supported.  The cli is installed via:
