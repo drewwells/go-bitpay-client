@@ -1,7 +1,6 @@
 package go_bitpay_client
 
 import (
-	"fmt"
 	"math/big"
 
 	btcaddr "github.com/drewwells/gimme_bitcoin_address"
@@ -18,7 +17,7 @@ func Keygen() ([]byte, []byte, error) {
 	priv := p.D.Bytes()
 	//fmt.Printf("int  %d %x\n", len(p.D.Bytes()), p.D.Bytes()) //THIS IS IT
 	//fmt.Printf("% #v\n", pretty.Formatter(b))
-	pub := public(b.X, b.Y)
+	pub := public(b.X, b.Y, true)
 	//fmt.Printf("pub  %d %x\n", len(pub), pub)
 
 	return priv, pub, err
@@ -32,13 +31,12 @@ const (
 	EPHEMERAL = 0x02
 )
 
-// Sin accepts as input PublicKey and returns a SIN (Secure Identity Number)
+// Sin accepts as input hex encoded compressed PublicKey and
+// returns a SIN (Secure Identity Number)
 // Learn more: https://en.bitcoin.it/wiki/Identity_protocol_v1#SIN_record
-func Sin(key PublicKey) []byte {
-
-	//key, _ = hex.DecodeString("02F840A04114081690223B7069071A70D6DABB891763B638CC20C7EC3BD58E6C86")
+func Sin(key []byte) []byte {
 	rimphash := btc.Rimp160AfterSha256(key)
-	fmt.Printf("step2: %x\n", rimphash)
+	// fmt.Printf("step2: %x\n", rimphash)
 	// Type1 persistant keys prefix with main 0x01, testnet 0x11
 	// Type2 ephemeral 0x02
 	bt := []byte{0x0F, 0x02}
@@ -63,10 +61,22 @@ func Sin(key PublicKey) []byte {
 }
 
 // Accepts the X, Y point and returns the Public Key
-func public(X, Y *big.Int) []byte {
+func public(X, Y *big.Int, compressed bool) []byte {
+	var pubkey_bytes []byte
+	if compressed {
+		prefix := make([]byte, 1)
+		mod := Y.Mod(Y, big.NewInt(2)).Cmp(big.NewInt(0))
+		if mod == 0 {
+			prefix[0] = 0x02
+		} else {
+			prefix[0] = 0x03
+		}
+		pubkey_bytes = append(prefix, X.Bytes()...)
+		return pubkey_bytes
+	}
 
 	/* Convert the public key to a byte sequence */
-	pubkey_bytes := append(X.Bytes(), Y.Bytes()...)
+	pubkey_bytes = append(X.Bytes(), Y.Bytes()...)
 
 	/* 1. Prepend 0x04 */
 	return append([]byte{0x04}, pubkey_bytes...)
@@ -75,12 +85,12 @@ func public(X, Y *big.Int) []byte {
 
 // Reference for generating compressed keys
 // github.com/piotrnar/gocoin/blob/master/lib/btc
-func PublicFromPrivate(priv []byte) []byte {
+func PublicFromPrivate(priv []byte, compressed bool) []byte {
 	d := new(big.Int).SetBytes(priv)
 	curve := getCurve()
 	Q := curve.Point_scalar_multiply(d, curve.G)
 
-	return public(Q.X, Q.Y)
+	return public(Q.X, Q.Y, compressed)
 }
 
 func getCurve() *btcaddr.EllipticCurve {

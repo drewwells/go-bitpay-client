@@ -7,6 +7,10 @@ import (
 	"testing"
 )
 
+const (
+	priv = "1f0dd50dd70a6fce3fbe81b922d89610742b37aa1eae9f82ffecb5571dcebfa4"
+)
+
 func TestKeygen(t *testing.T) {
 
 	priv, pub, err := Keygen()
@@ -16,23 +20,43 @@ func TestKeygen(t *testing.T) {
 	_, _ = priv, pub
 	fmt.Printf("Private: %x\n", priv)
 	fmt.Printf("Public: %x\n", pub)
+
 	// The output is random, so needs a test validating the
 	// pub and priv key are connected.
 }
 
-func TestSin(t *testing.T) {
-	s := "a72e6ed895e9ec2621bcccb93a11b73100887bdbb684cbfa6241b6076c54d0b4"
-	src, _ := hex.DecodeString(s)
-	pub := PublicFromPrivate([]byte(src))
-	//pubstr := "02F840A04114081690223B7069071A70D6DABB891763B638CC20C7EC3BD58E6C86"
+func TestPublicFromPrivate(t *testing.T) {
+	full := hex.EncodeToString(PublicFromPrivate([]byte(priv), false))
+	comp := hex.EncodeToString(PublicFromPrivate([]byte(priv), true))
 
-	compressed := append([]byte{0x04}, pub[1:]...)[:33]
-	fmt.Println("Compressed: 025C6E29280398E8706A65A094391DB956C219B2B9E3950D8967BC5B029285B5BC")
-	fmt.Printf("Compressed: %X\n", compressed)
-	//pubstr = "025C6E29280398E8706A65A094391DB956C219B2B9E3950D8967BC5B029285B5BC"
-	dec, _ := hex.DecodeString(string(compressed))
-	sin := Sin(dec)
-	_ = sin
-	fmt.Printf("Public: %x\n", pub)
-	fmt.Printf("Sin:    %x\n", sin)
+	eful := "047dc432eef530a7d46066921af445ac67ae3147e93131910c1578c813af06375ef9b0e9987c243f0a78df60eac6f9c777f2ba66e57936a9bb1dccb76fead0c4a0"
+	ecom := "027dc432eef530a7d46066921af445ac67ae3147e93131910c1578c813af06375e"
+
+	if eful != full {
+		t.Errorf("got:\n%s\nwant:\n%s\n",
+			full, eful)
+	}
+	if ecom != comp {
+		t.Errorf("got:\n%s\nwant:\n%s\n",
+			comp, ecom)
+	}
+}
+
+func ExampleSin() {
+
+	src, _ := hex.DecodeString(priv)
+
+	pub := PublicFromPrivate(src, false)
+	pubcomp := PublicFromPrivate(src, true)
+
+	sin := Sin(pubcomp)
+
+	fmt.Printf("Public:  %x\n", string(pub))
+	fmt.Printf("PubComp: %x\n", string(pubcomp))
+	fmt.Printf("Sin:     %s\n", string(sin))
+
+	// Output:
+	// Public:  04c6072aad509c88edad53756abc01f00f9e3feeb08fd748b4081964bae97e253214b138fb752811e8aa2d1661ecc7a408b27aaa3bdcaee408f52530c61a007953
+	// PubComp: 03c6072aad509c88edad53756abc01f00f9e3feeb08fd748b4081964bae97e2532
+	// Sin:     TfFabGCCATnbxfYRYfkCjM1RDC64aZfRJAu
 }
