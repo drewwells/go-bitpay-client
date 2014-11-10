@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	priv = "1f0dd50dd70a6fce3fbe81b922d89610742b37aa1eae9f82ffecb5571dcebfa4"
+	TESTPRIV = "1f0dd50dd70a6fce3fbe81b922d89610742b37aa1eae9f82ffecb5571dcebfa4"
 )
 
 func TestKeygen(t *testing.T) {
@@ -18,16 +18,16 @@ func TestKeygen(t *testing.T) {
 		log.Fatal(err)
 	}
 	_, _ = priv, pub
-	fmt.Printf("Private: %x\n", priv)
-	fmt.Printf("Public: %x\n", pub)
+	// fmt.Printf("Private: %x\n", priv)
+	// fmt.Printf("Public: %x\n", pub)
 
 	// The output is random, so needs a test validating the
 	// pub and priv key are connected.
 }
 
 func TestPublicFromPrivate(t *testing.T) {
-	full := hex.EncodeToString(PublicFromPrivate([]byte(priv), false))
-	comp := hex.EncodeToString(PublicFromPrivate([]byte(priv), true))
+	full := hex.EncodeToString(PublicFromPrivate([]byte(TESTPRIV), false))
+	comp := hex.EncodeToString(PublicFromPrivate([]byte(TESTPRIV), true))
 
 	eful := "047dc432eef530a7d46066921af445ac67ae3147e93131910c1578c813af06375ef9b0e9987c243f0a78df60eac6f9c777f2ba66e57936a9bb1dccb76fead0c4a0"
 	ecom := "027dc432eef530a7d46066921af445ac67ae3147e93131910c1578c813af06375e"
@@ -44,8 +44,7 @@ func TestPublicFromPrivate(t *testing.T) {
 
 func ExampleSin() {
 
-	src, _ := hex.DecodeString(priv)
-
+	src, _ := hex.DecodeString(TESTPRIV)
 	pub := PublicFromPrivate(src, false)
 	pubcomp := PublicFromPrivate(src, true)
 
