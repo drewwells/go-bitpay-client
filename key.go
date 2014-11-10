@@ -5,7 +5,6 @@ import (
 
 	btcaddr "github.com/drewwells/gimme_bitcoin_address"
 	"github.com/drewwells/go-bitpay-client/encoding/base58"
-	"github.com/piotrnar/gocoin/lib/btc"
 )
 
 // Keygen generates a new private/public key pair using Bitcoin scheme
@@ -35,15 +34,17 @@ const (
 // returns a SIN (Secure Identity Number)
 // Learn more: https://en.bitcoin.it/wiki/Identity_protocol_v1#SIN_record
 func Sin(key []byte) []byte {
-	rimphash := btc.Rimp160AfterSha256(key)
-	// fmt.Printf("step2: %x\n", rimphash)
+	//rhash := btc.Rimp160AfterSha256(key)
+	rhash := make([]byte, 20)
+	RimpHash(rhash, key)
+	// fmt.Printf("step2: %x\n", rhash)
 	// Type1 persistant keys prefix with main 0x01, testnet 0x11
 	// Type2 ephemeral 0x02
 	bt := []byte{0x0F, 0x02}
 	digest := make([]byte, 22)
 	copy(digest, bt)
-	for i := range rimphash {
-		digest[i+2] = rimphash[i]
+	for i := range rhash {
+		digest[i+2] = rhash[i]
 	}
 	//fmt.Printf("step3: %x\n", digest)
 	hash := base58.DoubleSha256(digest)
