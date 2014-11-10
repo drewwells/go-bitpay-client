@@ -70,7 +70,7 @@ func DecodeString(s string) ([]byte, error) {
 }
 
 // DoubleSha256 wraps calling Sha256 twice
-func doubleSha256(b []byte) []byte {
+func DoubleSha256(b []byte) []byte {
 	hasher := sha256.New()
 	hasher.Write(b)
 	sum := hasher.Sum(nil)
@@ -85,7 +85,7 @@ func doubleSha256(b []byte) []byte {
 func Check(h []byte) string {
 	check := make([]byte, len(h)+4)
 	copy(check, h)
-	hash := doubleSha256(h)[:4]
+	hash := DoubleSha256(h)[:4]
 
 	for i := 0; i < 4; i++ {
 		check[i+len(h)] = hash[i]

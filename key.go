@@ -1,11 +1,12 @@
 package go_bitpay_client
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"math/big"
 
 	btcaddr "github.com/drewwells/gimme_bitcoin_address"
+	"github.com/drewwells/go-bitpay-client/encoding/base58"
+	"github.com/piotrnar/gocoin/lib/btc"
 )
 
 // Keygen generates a new private/public key pair using Bitcoin scheme
@@ -32,23 +33,37 @@ const (
 )
 
 // Sin accepts as input PublicKey and returns a SIN (Secure Identity Number)
-// Learn more: https://en.bitcoin.it/wiki/Identity_protocol_v1
+// Learn more: https://en.bitcoin.it/wiki/Identity_protocol_v1#SIN_record
 func Sin(key PublicKey) []byte {
-	s := (sha256.New()).Sum(key)
+
+	//key, _ = hex.DecodeString("02F840A04114081690223B7069071A70D6DABB891763B638CC20C7EC3BD58E6C86")
+	rimphash := btc.Rimp160AfterSha256(key)
+	fmt.Printf("step2: %x\n", rimphash)
 	// Type1 persistant keys prefix with main 0x01, testnet 0x11
 	// Type2 ephemeral 0x02
-	bt := 0x02
-	fmt.Println(Sin)
-	_, _ = s, bt
-	return []byte{}
+	bt := []byte{0x0F, 0x02}
+	digest := make([]byte, 22)
+	copy(digest, bt)
+	for i := range rimphash {
+		digest[i+2] = rimphash[i]
+	}
+	//fmt.Printf("step3: %x\n", digest)
+	hash := base58.DoubleSha256(digest)
+	//fmt.Printf("step4: %x\n", hash)
+
+	checksum := hash[:4]
+	//fmt.Printf("step5: %x\n", checksum)
+
+	sin := append(digest, checksum...)
+	//fmt.Printf("step6: %x\n", sin)
+	encodedSin, _ := base58.Encode([]byte(sin))
+	//fmt.Printf("step7: %s\n", encodedSin)
+
+	return encodedSin
 }
 
 // Accepts the X, Y point and returns the Public Key
 func public(X, Y *big.Int) []byte {
-
-	//sha256_h := sha256.New()
-	/* Create a new RIPEMD160 Context */
-	//ripemd160_h := ripemd160.New()
 
 	/* Convert the public key to a byte sequence */
 	pubkey_bytes := append(X.Bytes(), Y.Bytes()...)
@@ -58,11 +73,13 @@ func public(X, Y *big.Int) []byte {
 
 }
 
+// Reference for generating compressed keys
+// github.com/piotrnar/gocoin/blob/master/lib/btc
 func PublicFromPrivate(priv []byte) []byte {
 	d := new(big.Int).SetBytes(priv)
 	curve := getCurve()
 	Q := curve.Point_scalar_multiply(d, curve.G)
-	//fmt.Printf("% #v\n", pretty.Formatter(Q))
+
 	return public(Q.X, Q.Y)
 }
 
