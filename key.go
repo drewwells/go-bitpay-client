@@ -7,21 +7,6 @@ import (
 	"github.com/drewwells/go-bitpay-client/encoding/base58"
 )
 
-// Keygen generates a new private/public key pair using Bitcoin scheme
-func Keygen() ([]byte, []byte, error) {
-
-	p, b, err := btcaddr.Bitcoin_GenerateKeypair()
-	//fmt.Printf("Bitcoin len: %d\n", len(p.D.Bytes()))
-	//privstr := gimme.Bitcoin_Prikey2WIF(p)
-	priv := p.D.Bytes()
-	//fmt.Printf("int  %d %x\n", len(p.D.Bytes()), p.D.Bytes()) //THIS IS IT
-	//fmt.Printf("% #v\n", pretty.Formatter(b))
-	pub := public(b.X, b.Y, true)
-	//fmt.Printf("pub  %d %x\n", len(pub), pub)
-
-	return priv, pub, err
-}
-
 type PublicKey []byte
 
 const (
@@ -29,6 +14,17 @@ const (
 	TESTNET   = 0x11
 	EPHEMERAL = 0x02
 )
+
+// Create a new Bitcoin compliant private and public key
+// pair.
+func GenerateKeyGen() ([]byte, []byte, error) {
+	p, b, err := btcaddr.Bitcoin_GenerateKeypair()
+	priv := p.D.Bytes()
+
+	pub := public(b.X, b.Y, true)
+
+	return priv, pub, err
+}
 
 // Sin accepts as input hex encoded compressed PublicKey and
 // returns a SIN (Secure Identity Number)

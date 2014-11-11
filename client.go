@@ -17,12 +17,11 @@ import (
 
 	"code.google.com/p/gcfg"
 	"github.com/conformal/btcec"
-	"github.com/nu7hatch/gouuid"
 )
 
 type Config struct {
 	Global struct {
-		Pub, Priv, End, Sin, Token, Publickey string
+		Public, Private, End, Sin, Token string
 	}
 }
 
@@ -35,17 +34,9 @@ func init() {
 		log.Fatal("Please refer to .env.example for config values")
 
 	}
-	if cfg.Global.Pub == "" {
+	if cfg.Global.Public == "" {
 		log.Fatal("Please register an API key at bitpay.com and sign it with offical bitpay cli, node or otherwise.")
 	}
-}
-
-func guid() string {
-	u, err := uuid.NewV4()
-	if err != nil {
-		panic(err)
-	}
-	return u.String()
 }
 
 // Creates or claims an access token
@@ -55,7 +46,7 @@ func Token() []byte {
 		"POST", map[string]interface{}{
 			"guid":  guid(),
 			"label": "node-bitpay-client-dwells-mac2",
-			"id":    cfg.Global.Token,
+			"id":    cfg.Global.Sin,
 		}, true)
 	return resp
 }
@@ -97,6 +88,17 @@ func Bills() []byte {
 	return stringResponse("/bills", "GET", map[string]interface{}{
 		"token": cfg.Global.Token,
 	}, false)
+}
+
+// Keygen returns private, public (compressed), and SIN
+func Keygen() ([]byte, []byte, []byte) {
+
+	priv, pub, err := GenerateKeyGen()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Return the public key so it looks like things are happening
+	return priv, pub, Sin(pub)
 }
 
 func Rates() []byte {
@@ -146,12 +148,12 @@ func stringResponse(path, method string, data map[string]interface{}, public boo
 	if err != nil {
 		log.Fatal(err)
 	}
-	pub := cfg.Global.Pub
+	pub := cfg.Global.Public
 	contract := path
 	if method != "GET" {
 		contract += string(bs)
 	}
-	sign := signMessage(cfg.Global.Priv, contract)
+	sign := signMessage(cfg.Global.Private, contract)
 
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("x-accept-version", "2.0.0")
